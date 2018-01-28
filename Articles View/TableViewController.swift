@@ -9,15 +9,13 @@
 import UIKit
 
 extension String {
-    var replacingHTMLEntities: String? {
-        do {
-            return try NSAttributedString(data: Data(utf8), options: [
-                .documentType: NSAttributedString.DocumentType.html,
-                .characterEncoding: String.Encoding.utf8.rawValue
-                ], documentAttributes: nil).string
-        } catch {
-            return nil
-        }
+    var htmlDecoded: String {
+        let decoded = try? NSAttributedString(data: Data(utf8), options: [
+            .documentType: NSAttributedString.DocumentType.html,
+            .characterEncoding: String.Encoding.utf8.rawValue
+            ], documentAttributes: nil).string
+        
+        return decoded ?? self
     }
 }
 
@@ -55,7 +53,7 @@ class TableViewController: UITableViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        let requestUrl: URL = URL(string: "http://algonquintimes.com/wp-json/wp/v2/posts")!
+        let requestUrl: URL = URL(string: "http://algonquintimes.com/wp-json/wp/v2/posts?per_page=100")!
         let myRequest: URLRequest = URLRequest(url: requestUrl)
         let mySession: URLSession = URLSession.shared
         let myTask = mySession.dataTask(with: myRequest, completionHandler: requestTask)
@@ -69,13 +67,12 @@ class TableViewController: UITableViewController {
     {
         let cell = tableView.dequeueReusableCell(withIdentifier: "ArticleCell", for: indexPath)
         if let eventInfo = jsonArray?[indexPath.row] {
-//            cell.textLabel!.text = eventInfo["slug"]! as? String
             
-            let coordinatesJSON = eventInfo["title"] as? [String: Any]
-            let latitude = coordinatesJSON?["rendered"] as? String
-            cell.textLabel!.text = latitude!.replacingHTMLEntities!
+            let title = eventInfo["title"] as? [String: Any]
+            let titleRendered = title?["rendered"] as? String
+           
+            cell.textLabel!.text = titleRendered!  // .htmlDecoded
             
-            //cell.detailTextLabel!.text = eventInfo["addressEN"]! as? String
         }
         return cell
     }

@@ -91,7 +91,7 @@ class ArticleViewController: UIViewController {
         let articleContent = article!["content"] as? [String: Any]
         let content = articleContent?["rendered"] as? String
         
-        textView.text = content!.replacingHTMLEntities!
+        textView.text = content!.htmlDecoded
        
         let links = article!["_links"] as? [String: Any]
         if let author = links!["author"] as? [[String: Any]], let authorLink = author.first?["href"] as? String {
